@@ -4,9 +4,11 @@
       <h2>Canchas disponibles</h2>
       <p>Encuentra y reserva tu cancha sintética favorita</p>
     </div>
+    @if (auth.isAdmin()) {
     <a routerLink="/stadiums/new" class="btn btn-primary" style="text-decoration:none">
       + Nueva cancha
     </a>
+    }
   </div>
 
   <div class="search-bar card">
@@ -39,9 +41,24 @@
             <span class="tag">{{ s.fieldType }}</span>
             <span class="tag">{{ s.capacity }} personas</span>
           </div>
+          @if (!auth.isAdmin()) {
           <button class="btn btn-primary btn-block" (click)="goToBooking(s)">
             Reservar
           </button>
+          } @else {
+          <div class="stadium-actions">
+            <button class="btn btn-outline btn-block" (click)="editStadium(s)">
+              Editar
+            </button>
+            <button
+              class="btn btn-danger btn-block"
+              [disabled]="deletingId() === s.id"
+              (click)="deleteStadium(s)"
+            >
+              {{ deletingId() === s.id ? 'Eliminando...' : 'Eliminar' }}
+            </button>
+          </div>
+          }
         </div>
       }
     </div>

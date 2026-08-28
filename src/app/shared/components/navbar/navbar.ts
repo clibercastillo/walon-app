@@ -29,6 +29,6 @@ export class Navbar {
   logout(): void {
     this.notifications.reset();
     this.auth.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/home']);
   }
 }

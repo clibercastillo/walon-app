@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -22,11 +23,16 @@ export const routes: Routes = [
 
   {
     path: 'stadiums/new',
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     loadComponent: () =>
       import('./features/stadiums/stadium-form/stadium-form').then((m) => m.StadiumForm),
   },
-
+  {
+    path: 'stadiums',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () =>
+      import('./features/stadiums/stadium-list/stadium-list').then((m) => m.StadiumList),
+  },
   {
     path: 'bookings',
     canActivate: [authGuard],
@@ -47,5 +53,12 @@ export const routes: Routes = [
       import('./features/notifications/notification-list').then((m) => m.NotificationList),
   },
 
+  {
+    path: 'stadiums/:id/edit',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () =>
+      import('./features/stadiums/stadium-form/stadium-form').then((m) => m.StadiumForm),
+  },
+  
   { path: '**', redirectTo: '/home' },
 ];

@@ -1,12 +1,15 @@
 <div class="page page-narrow">
   <div class="page-header">
     <div>
-      <h2>Nueva cancha</h2>
-      <p>Registra una cancha sintética disponible para reserva</p>
+      <h2>{{ editingId() ? 'Editar cancha' : 'Nueva cancha' }}</h2>
+      <p>{{ editingId() ? 'Actualiza los datos de la cancha' : 'Registra una cancha sintética disponible para reserva' }}</p>
     </div>
     <a routerLink="/stadiums" class="btn btn-outline" style="text-decoration:none">Volver</a>
   </div>
 
+  @if (loadingStadium()) {
+  <div class="empty-state">Cargando cancha...</div>
+  } @else {
   <form [formGroup]="form" (ngSubmit)="submit()" class="card">
     <div class="field">
       <label>Nombre</label>
@@ -56,7 +59,8 @@
     </div>
 
     <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
-      {{ loading() ? 'Guardando...' : 'Guardar cancha' }}
+      {{ loading() ? 'Guardando...' : (editingId() ? 'Actualizar cancha' : 'Guardar cancha') }}
     </button>
   </form>
+  }
 </div>
