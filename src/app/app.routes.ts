@@ -2,12 +2,12 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+
   {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [authGuard],
+    path: 'home',
     loadComponent: () =>
-      import('./features/bookings/booking-form/booking-form').then((m) => m.BookingForm),
+      import('./features/home/home').then((m) => m.Home),
   },
 
   {
@@ -20,12 +20,6 @@ export const routes: Routes = [
       import('./features/auth/register/register').then((m) => m.Register),
   },
 
-  {
-    path: 'stadiums',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/stadiums/stadium-list/stadium-list').then((m) => m.StadiumList),
-  },
   {
     path: 'stadiums/new',
     canActivate: [authGuard],
@@ -53,5 +47,5 @@ export const routes: Routes = [
       import('./features/notifications/notification-list').then((m) => m.NotificationList),
   },
 
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: '/home' },
 ];

@@ -33,7 +33,7 @@ export class Login {
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.toast.success('¡Bienvenido de nuevo!');
-        this.router.navigate(['/bookings/new?stadiumId=1']);
+        this.router.navigate(['/home']);
       },
       error: () => this.loading.set(false),
       complete: () => this.loading.set(false),

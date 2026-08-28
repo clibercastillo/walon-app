@@ -4,7 +4,7 @@
       <h2>Mis reservas</h2>
       <p>Gestiona el estado de tus reservas</p>
     </div>
-    <a routerLink="/stadiums" class="btn btn-primary" style="text-decoration:none">
+    <a routerLink="/home" class="btn btn-primary" style="text-decoration:none">
       + Nueva reserva
     </a>
   </div>
@@ -14,7 +14,7 @@
   } @else if (bookings().length === 0) {
     <div class="empty-state">
       <p>Aún no tienes reservas.</p>
-      <a routerLink="/stadiums" class="btn btn-outline" style="text-decoration:none">Ver canchas</a>
+      <a routerLink="/home" class="btn btn-outline" style="text-decoration:none">Ver canchas</a>
     </div>
   } @else {
     <div class="booking-list">

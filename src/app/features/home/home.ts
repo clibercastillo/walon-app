@@ -1,12 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { catchError, of } from 'rxjs';
-import { BookingService } from '../../../core/services/booking.service';
-import { StadiumService } from '../../../core/services/stadium.service';
-import { Stadium } from '../../../core/models/stadium.model';
-import { Booking } from '../../../core/models/booking.model';
-import { ToastService } from '../../../core/services/toast.service';
+import { StadiumService } from '../../core/services/stadium.service';
+import { AuthService } from '../../core/services/auth.service';
+import { BookingService } from '../../core/services/booking.service';
+import { Stadium } from '../../core/models/stadium.model';
+import { Booking } from '../../core/models/booking.model';
+import { ToastService } from '../../core/services/toast.service';
 
 interface DayOption {
   iso: string;
@@ -22,50 +23,38 @@ interface Slot {
   status: 'available' | 'occupied' | 'selected' | 'past';
 }
 
-interface MockReview {
-  name: string;
-  initial: string;
-  stars: number;
-  date: string;
-  comment: string;
-}
-
 const OPEN_HOUR = 7;
 const CLOSE_HOUR = 23;
 const SLOT_MINUTES = 30;
-const MAX_SLOTS = 6; // 3h máximo
+const MAX_SLOTS = 6;
 
 @Component({
-  selector: 'app-booking-form',
+  selector: 'app-home',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './booking-form.html',
-  styleUrl: './booking-form.scss',
+  templateUrl: './home.html',
+  styleUrl: './home.scss',
 })
-export class BookingForm {
-  private bookingService = inject(BookingService);
+export class Home {
   private stadiumService = inject(StadiumService);
-  private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+  private bookingService = inject(BookingService);
   private router = inject(Router);
   private toast = inject(ToastService);
 
-  loading = signal(false);
   loadingStadium = signal(true);
+  loading = signal(false);
   stadium = signal<Stadium | null>(null);
+  showLoginModal = signal(false);
 
   days = signal<DayOption[]>(this.buildDays());
   selectedDayIso = signal<string>(this.days()[0].iso);
-
   slots = signal<Slot[]>([]);
   selectedRange = signal<{ startIdx: number; endIdx: number } | null>(null);
 
-  // Placeholder: número de WhatsApp de ejemplo. Reemplázalo por el
-  // teléfono real del dueño cuando agregues ese campo al modelo Stadium.
   private demoWhatsapp = '51999999999';
 
-  // Placeholder: reseñas mock. Reemplaza por una llamada real a tu
-  // futuro ms-reviews (o al servicio que uses para calificaciones).
-  mockReviews: MockReview[] = [
+  mockReviews = [
     {
       name: 'Cliber Castillo',
       initial: 'A',
@@ -120,26 +109,21 @@ export class BookingForm {
   }
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.queryParamMap.get('stadiumId');
-    const id = idParam ? Number(idParam) : 1;  // ← default a 1 si no viene en la URL
-
-    this.stadiumService.findById(id).subscribe({
+    this.stadiumService.findById(1).subscribe({
       next: (data) => {
         this.stadium.set(data);
         this.loadingStadium.set(false);
         this.loadSlotsForDay();
       },
-      error: () => {
-        this.loadingStadium.set(false);
-        this.toast.error('No se pudo cargar la cancha');
-      },
+      error: () => this.loadingStadium.set(false),
     });
   }
+
   private buildDays(): DayOption[] {
     const labels = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     const out: DayOption[] = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 30; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       out.push({
@@ -249,6 +233,11 @@ export class BookingForm {
   }
 
   confirm(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.showLoginModal.set(true);
+      return;
+    }
+
     const stadium = this.stadium();
     const range = this.selectedRange();
     if (!stadium || !range) {
@@ -273,5 +262,14 @@ export class BookingForm {
       error: () => this.loading.set(false),
       complete: () => this.loading.set(false),
     });
+  }
+
+  closeModal(): void {
+    this.showLoginModal.set(false);
+  }
+
+  goToLogin(): void {
+    this.showLoginModal.set(false);
+    this.router.navigate(['/login']);
   }
 }

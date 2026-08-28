@@ -1,0 +1,224 @@
+@if (loadingStadium()) {
+<div class="page">
+  <div class="empty-state">Cargando cancha...</div>
+</div>
+} @else if (stadium(); as s) {
+
+<div class="hero-field">
+  <div class="field-art">
+    <img src="images/cancha-1.jpg" alt="Campo deportivo WALON" class="field-photo" />
+  </div>
+  <div class="hero-top">
+    <a class="back-link">Reserva tu cancha en segundos</a>
+  </div>
+  <div class="hero-overlay">
+    <div class="hero-overlay-inner">
+      <div class="hero-tags">
+        <span class="tag tag-accent">{{ s.fieldType }}</span>
+        <span class="tag">{{ s.capacity }} personas</span>
+      </div>
+      <h1>{{ s.name }}</h1>
+      <p class="hero-address">
+        {{ s.city }} · {{ s.address }}
+        <span class="rating">
+          @for (star of stars(5); track $index; let i = $index) {
+          <span class="star" [class.filled]="i < averageRating()">★</span>
+          }
+          {{ averageRating() }} ({{ mockReviews.length }})
+        </span>
+      </p>
+      <div class="hero-price">
+        S/ {{ s.pricePerHour / 2 | number:'1.0-2' }}
+        <small>/30min desde</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page detail-page">
+  <div class="detail-grid">
+    <div class="detail-main">
+
+      <div class="card">
+        <h3>Detalles de la cancha</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-icon-wrap">
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+              </div>
+              <span class="icon-check"><svg viewBox="0 0 24 24" width="10" height="10"><path fill="#fff" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></span>
+            </div>
+            <span class="info-label">Formato</span>
+            <strong>{{ s.fieldType }}</strong>
+          </div>
+          <div class="info-item">
+            <div class="info-icon-wrap">
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2 1 9l11 6 9-4.9V17h2V9L12 2zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+              </div>
+              <span class="icon-check"><svg viewBox="0 0 24 24" width="10" height="10"><path fill="#fff" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></span>
+            </div>
+            <span class="info-label">Superficie</span>
+            <strong>Sintético</strong>
+          </div>
+          <div class="info-item">
+            <div class="info-icon-wrap">
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.41l9 9c.36.36.86.59 1.41.59.55 0 1.05-.23 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.05-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+              </div>
+              <span class="icon-check"><svg viewBox="0 0 24 24" width="10" height="10"><path fill="#fff" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></span>
+            </div>
+            <span class="info-label">Precio / hora</span>
+            <strong>S/ {{ s.pricePerHour }}</strong>
+          </div>
+          <div class="info-item">
+            <div class="info-icon-wrap">
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+              </div>
+              <span class="icon-check"><svg viewBox="0 0 24 24" width="10" height="10"><path fill="#fff" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></span>
+            </div>
+            <span class="info-label">Ciudad</span>
+            <strong>{{ s.city }}</strong>
+          </div>
+          <div class="info-item">
+            <div class="info-icon-wrap">
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+              </div>
+              <span class="icon-check"><svg viewBox="0 0 24 24" width="10" height="10"><path fill="#fff" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></span>
+            </div>
+            <span class="info-label">Dirección</span>
+            <strong>{{ s.address }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Fotos de la cancha <span class="muted">(ilustrativas)</span></h3>
+        <div class="gallery-grid">
+          @for (g of galleryPlaceholders; track g) {
+          <div class="gallery-item">
+            <div class="field-stripe small"></div>
+            <span class="gallery-badge">{{ g }}/{{ galleryPlaceholders.length }}</span>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Ubicación</h3>
+        <div class="map-placeholder">
+          <svg viewBox="0 0 24 24" width="32" height="32" class="map-pin"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+        </div>
+        <div class="map-footer">
+          <span>{{ s.address }}, {{ s.city }}</span>
+          <a [href]="mapsUrl()" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Abrir en Maps</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>¿Un problema con tu reserva?</h3>
+        <p>Contacta directamente al dueño de la cancha</p>
+        <div class="contact-actions">
+          <a class="btn btn-primary" [href]="whatsappLink()" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn btn-outline" href="mailto:{{ s.ownerEmail }}">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            {{ s.ownerEmail }}
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Reseñas ({{ mockReviews.length }})</h3>
+        @for (r of mockReviews; track r.name) {
+        <div class="review-item">
+          <div class="review-avatar">{{ r.initial }}</div>
+          <div class="review-body">
+            <div class="review-top">
+              <strong>{{ r.name }}</strong>
+              <span class="review-stars">
+                @for (star of stars(r.stars); track $index) {
+                <span class="star filled">★</span>
+                }
+              </span>
+            </div>
+            <span class="review-date">{{ r.date }}</span>
+            <p>{{ r.comment }}</p>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="detail-side">
+      <div class="card booking-panel">
+        <h3><svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align:-3px;margin-right:4px"><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14z"/></svg>Reservar horario</h3>
+
+        <div class="day-tabs">
+          @for (d of days(); track d.iso) {
+          <button type="button" class="day-tab" [class.active]="selectedDayIso() === d.iso" (click)="selectDay(d.iso)">
+            <span class="day-label">{{ d.dayLabel }}</span>
+            <span class="day-num">{{ d.dayNum }}</span>
+            <span class="day-month">{{ d.month }}</span>
+          </button>
+          }
+        </div>
+
+        <p class="slot-hint">Toca slots seguidos para reservar más tiempo · máximo 3h</p>
+
+        <div class="slot-grid">
+          @for (slot of slots(); track slot.start; let i = $index) {
+          <button type="button" class="slot" [class.slot-selected]="isSelected(i)"
+            [class.slot-occupied]="slot.status === 'occupied'" [class.slot-past]="slot.status === 'past'"
+            [disabled]="slot.status === 'occupied' || slot.status === 'past'" (click)="onSlotClick(i)">
+            <span>{{ slot.start }}</span>
+            <small>S/ {{ slot.price }}</small>
+          </button>
+          }
+        </div>
+
+        <div class="slot-legend">
+          <span><i class="dot dot-occupied"></i> Ocupado</span>
+          <span><i class="dot dot-free"></i> Libre</span>
+          <span><i class="dot dot-selected"></i> Elegido</span>
+        </div>
+
+        @if (selectedRange()) {
+        <div class="summary card">
+          <span>{{ selectedRangeLabel() }}</span>
+          <strong>S/ {{ estimatedTotal() }}</strong>
+        </div>
+        }
+
+        <button type="button" class="btn btn-primary btn-block" [disabled]="!selectedRange() || loading()"
+          (click)="confirm()">
+          {{ loading() ? 'Reservando...' : (selectedRange() ? 'Confirmar reserva' : 'Selecciona un horario') }}
+        </button>
+
+        <p class="confirm-note">
+          <svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:3px"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11H7v-2h4V6h2v7z"/></svg>
+          Reserva confirmada al instante
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+@if (showLoginModal()) {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" width="40" height="40"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+    </div>
+    <h3>Inicia sesión para reservar</h3>
+    <p>Necesitas una cuenta para poder reservar esta cancha</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" (click)="goToLogin()">Ir a Login</button>
+      <button class="btn btn-outline" (click)="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+}
