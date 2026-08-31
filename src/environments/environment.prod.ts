@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  authUrl: 'https://api.tudominio.com/auth/api/auth',
-  stadiumsUrl: 'https://api.tudominio.com/stadiums/api/stadiums',
-  bookingsUrl: 'https://api.tudominio.com/bookings/api/bookings',
-  notificationsUrl: 'https://api.tudominio.com/notifications/api/notifications',
+  authUrl: 'https://TU_DOMINIO_O_IP/api/auth',
+  stadiumsUrl: 'https://TU_DOMINIO_O_IP/api/stadiums',
+  bookingsUrl: 'https://TU_DOMINIO_O_IP/api/bookings',
+  notificationsUrl: 'https://TU_DOMINIO_O_IP/api/notifications',
 };

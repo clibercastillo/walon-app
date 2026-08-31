@@ -34,6 +34,12 @@ export const routes: Routes = [
       import('./features/stadiums/stadium-list/stadium-list').then((m) => m.StadiumList),
   },
   {
+    path: 'calendar',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () =>
+      import('./features/calendar/calendar').then((m) => m.CalendarPage),
+  },
+  {
     path: 'bookings',
     canActivate: [authGuard],
     loadComponent: () =>

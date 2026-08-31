@@ -1,0 +1,118 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2>Calendario de reservas</h2>
+      <p>Reservas confirmadas en todas las canchas</p>
+    </div>
+
+    <div class="cal-controls">
+      <select
+        class="cal-select"
+        [ngModel]="stadiumFilter()"
+        (ngModelChange)="stadiumFilter.set($event); onStadiumFilterChange()"
+      >
+        <option [ngValue]="null">Todas las canchas</option>
+        @for (s of stadiums(); track s.id) {
+          <option [ngValue]="s.id">{{ s.name }}</option>
+        }
+      </select>
+
+      <div class="cal-toggle">
+        <button
+          class="btn btn-sm"
+          [class.btn-primary]="viewMode() === 'week'"
+          [class.btn-outline]="viewMode() !== 'week'"
+          (click)="setView('week')"
+        >
+          Semana
+        </button>
+        <button
+          class="btn btn-sm"
+          [class.btn-primary]="viewMode() === 'month'"
+          [class.btn-outline]="viewMode() !== 'month'"
+          (click)="setView('month')"
+        >
+          Mes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cal-nav card">
+    <button class="btn btn-outline btn-sm" (click)="prev()">‹</button>
+    <span class="cal-range">
+      {{ viewMode() === 'week' ? weekRangeLabel() : monthLabel() }}
+    </span>
+    <button class="btn btn-outline btn-sm" (click)="next()">›</button>
+    <button class="btn btn-outline btn-sm" (click)="today()">Hoy</button>
+  </div>
+
+  @if (loading()) {
+    <div class="empty-state">Cargando reservas...</div>
+  } @else if (viewMode() === 'week') {
+    <!-- ===== VISTA SEMANA ===== -->
+    <div class="week-grid card">
+      <div class="week-header">
+        <div class="time-col"></div>
+        @for (d of weekDays(); track d) {
+          <div class="day-col-header">
+            <span class="day-name">{{ d.toLocaleDateString('es-PE', { weekday: 'short' }) }}</span>
+            <span class="day-num">{{ d.getDate() }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="week-body">
+        <div class="time-col">
+          @for (h of hours; track h) {
+            <div class="hour-slot">{{ h }}:00</div>
+          }
+        </div>
+
+        @for (events of weekEventsByDay(); track $index) {
+          <div class="day-col" [style.height.px]="hours.length * 56">
+            @for (h of hours; track h) {
+              <div class="hour-line"></div>
+            }
+            @for (ev of events; track ev.booking.id) {
+              <div
+                class="event-block"
+                [style.top.px]="ev.top"
+                [style.height.px]="ev.height"
+                [title]="ev.stadiumName + ' · ' + ev.booking.userEmail"
+              >
+                <strong>{{ ev.stadiumName }}</strong>
+                <span>{{ ev.booking.startTime.slice(0, 5) }}–{{ ev.booking.endTime.slice(0, 5) }}</span>
+                <small>{{ ev.booking.userEmail }}</small>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- ===== VISTA MES ===== -->
+    <div class="month-grid card">
+      <div class="month-header">
+        @for (name of ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']; track name) {
+          <div class="month-header-cell">{{ name }}</div>
+        }
+      </div>
+      <div class="month-body">
+        @for (cell of monthCells(); track cell.date) {
+          <div class="month-cell" [class.out-month]="!cell.inMonth" [class.today]="cell.isToday">
+            <span class="month-day-num">{{ cell.date.getDate() }}</span>
+            @for (ev of cell.events.slice(0, 3); track ev.booking.id) {
+              <div class="month-chip" [title]="ev.stadiumName + ' · ' + ev.booking.userEmail">
+                {{ ev.booking.startTime.slice(0, 5) }} {{ ev.stadiumName }}
+              </div>
+            }
+            @if (cell.events.length > 3) {
+              <span class="month-more">+{{ cell.events.length - 3 }} más</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
