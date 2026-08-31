@@ -1,7 +1,7 @@
 export const environment = {
-  production: false,
-  authUrl: 'http://3.131.90.240/api/auth',
-  stadiumsUrl: 'http://3.131.90.240/api/stadiums',
-  bookingsUrl: 'http://3.131.90.240/api/bookings',
-  notificationsUrl: 'http://3.131.90.240/api/notifications',
+  production: true,
+  authUrl: 'https://api.maderape.online/api/auth',
+  stadiumsUrl: 'https://api.maderape.online/api/stadiums',
+  bookingsUrl: 'https://api.maderape.online/api/bookings',
+  notificationsUrl: 'https://api.maderape.online/api/notifications',
 };
