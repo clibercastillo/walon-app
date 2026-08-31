@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
-  authUrl: 'http://localhost:8081/api/auth',
-  stadiumsUrl: 'http://localhost:8082/api/stadiums',
-  bookingsUrl: 'http://localhost:8083/api/bookings',
-  notificationsUrl: 'http://localhost:8084/api/notifications',
+  authUrl: 'http://3.131.90.240/api/auth',
+  stadiumsUrl: 'http://3.131.90.240/api/stadiums',
+  bookingsUrl: 'http://3.131.90.240/api/bookings',
+  notificationsUrl: 'http://3.131.90.240/api/notifications',
 };
