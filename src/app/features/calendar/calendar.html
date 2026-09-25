@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h2>Calendario de reservas</h2>
-      <p>Reservas confirmadas en todas las canchas</p>
+      <p>Reservas pendientes, confirmadas y completadas en todas las canchas</p>
     </div>
 
     <div class="cal-controls">
@@ -77,9 +77,10 @@
             @for (ev of events; track ev.booking.id) {
               <div
                 class="event-block"
+                [class]="'status-' + ev.booking.status.toLowerCase()"
                 [style.top.px]="ev.top"
                 [style.height.px]="ev.height"
-                [title]="ev.stadiumName + ' · ' + ev.booking.userEmail"
+                [title]="ev.stadiumName + ' · ' + ev.booking.userEmail + ' · ' + ev.booking.status"
               >
                 <strong>{{ ev.stadiumName }}</strong>
                 <span>{{ ev.booking.startTime.slice(0, 5) }}–{{ ev.booking.endTime.slice(0, 5) }}</span>
@@ -103,7 +104,7 @@
           <div class="month-cell" [class.out-month]="!cell.inMonth" [class.today]="cell.isToday">
             <span class="month-day-num">{{ cell.date.getDate() }}</span>
             @for (ev of cell.events.slice(0, 3); track ev.booking.id) {
-              <div class="month-chip" [title]="ev.stadiumName + ' · ' + ev.booking.userEmail">
+              <div class="month-chip" [class]="'status-' + ev.booking.status.toLowerCase()" [title]="ev.stadiumName + ' · ' + ev.booking.userEmail + ' · ' + ev.booking.status">
                 {{ ev.booking.startTime.slice(0, 5) }} {{ ev.stadiumName }}
               </div>
             }

@@ -1,0 +1,55 @@
+@if (open) {
+  <div class="rm-overlay" (click)="close()">
+    <div class="rm-card" (click)="$event.stopPropagation()">
+      <button class="rm-close" (click)="close()" [disabled]="sending()" aria-label="Cerrar">✕</button>
+
+      <div class="rm-header">
+        <div class="rm-icon">⚽</div>
+        <h3>¿Cómo estuvo tu partido?</h3>
+        @if (bookingLabel) {
+          <p class="rm-subtitle">{{ bookingLabel }}</p>
+        }
+      </div>
+
+      <div class="rm-stars">
+        @for (s of stars; track s) {
+          <button
+            type="button"
+            class="rm-star"
+            [class.filled]="s <= (hoverRating() || rating())"
+            (click)="setRating(s)"
+            (mouseenter)="hoverRating.set(s)"
+            (mouseleave)="hoverRating.set(0)"
+            [attr.aria-label]="s + ' estrellas'"
+          >★</button>
+        }
+      </div>
+      @if (error()) {
+        <small class="rm-error">{{ error() }}</small>
+      }
+
+      <label class="rm-field">
+        <span>Cuéntanos más (opcional)</span>
+        <textarea
+          rows="3"
+          placeholder="¿Cómo estuvo la cancha, la iluminación, el servicio?"
+          [(ngModel)]="comment"
+          [disabled]="sending()"
+        ></textarea>
+      </label>
+
+      <div class="rm-actions">
+        <button type="button" class="rm-skip" (click)="skip()" [disabled]="sending()">
+          Omitir
+        </button>
+        <button type="button" class="rm-submit" (click)="submit()" [disabled]="sending()">
+          @if (sending()) {
+            <span class="rm-spinner"></span> Enviando...
+          } @else {
+            Enviar reseña
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

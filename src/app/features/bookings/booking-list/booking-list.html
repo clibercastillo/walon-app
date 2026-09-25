@@ -52,3 +52,17 @@
     </div>
   }
 </div>
+
+<app-payment-modal
+  [open]="paymentModalOpen()"
+  [amount]="bookingToPay()?.totalPrice ?? null"
+  [bookingLabel]="paymentLabel()"
+  (closed)="closePaymentModal()"
+  (paid)="onPaid($event)"
+></app-payment-modal>
+<app-review-modal
+  [open]="reviewModalOpen()"
+  [bookingLabel]="reviewLabel()"
+  (closed)="closeReviewModal()"
+  (submitted)="onReviewSubmitted($event)"
+></app-review-modal>

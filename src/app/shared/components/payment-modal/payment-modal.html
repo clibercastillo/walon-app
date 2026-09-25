@@ -1,0 +1,120 @@
+@if (open) {
+  <div class="pm-overlay" (click)="close()">
+    <div class="pm-card" (click)="$event.stopPropagation()">
+      <button class="pm-close" (click)="close()" [disabled]="processing()" aria-label="Cerrar">✕</button>
+
+      <div class="pm-header">
+        <div class="pm-icon">💳</div>
+        <h3>Pago con tarjeta</h3>
+        @if (bookingLabel) {
+          <p class="pm-subtitle">{{ bookingLabel }}</p>
+        }
+        @if (amount !== null) {
+          <div class="pm-amount">S/ {{ amount.toFixed(2) }}</div>
+        }
+      </div>
+
+      <!-- Vista previa de la tarjeta -->
+      <div class="pm-preview">
+        <div class="pm-preview-top">
+          <span class="pm-chip"></span>
+          <span class="pm-brand">VISA</span>
+        </div>
+        <div class="pm-preview-number">{{ cardNumber || '•••• •••• •••• ••••' }}</div>
+        <div class="pm-preview-bottom">
+          <div>
+            <span class="pm-preview-label">Titular</span>
+            <div>{{ cardHolder || 'NOMBRE APELLIDO' }}</div>
+          </div>
+          <div>
+            <span class="pm-preview-label">Vence</span>
+            <div>{{ expiry || 'MM/AA' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <form (ngSubmit)="submit()" class="pm-form">
+        <label class="pm-field">
+          <span>Nombre del titular</span>
+          <input
+            type="text"
+            name="cardHolder"
+            placeholder="Como aparece en la tarjeta"
+            [(ngModel)]="cardHolder"
+            [disabled]="processing()"
+            autocomplete="cc-name"
+          />
+          @if (errors()['cardHolder']) {
+            <small class="pm-error">{{ errors()['cardHolder'] }}</small>
+          }
+        </label>
+
+        <label class="pm-field">
+          <span>Número de tarjeta</span>
+          <input
+            type="text"
+            name="cardNumber"
+            inputmode="numeric"
+            placeholder="0000 0000 0000 0000"
+            [ngModel]="cardNumber"
+            (ngModelChange)="onCardNumberInput($event)"
+            [disabled]="processing()"
+            autocomplete="cc-number"
+            maxlength="19"
+          />
+          @if (errors()['cardNumber']) {
+            <small class="pm-error">{{ errors()['cardNumber'] }}</small>
+          }
+        </label>
+
+        <div class="pm-row">
+          <label class="pm-field">
+            <span>Vencimiento</span>
+            <input
+              type="text"
+              name="expiry"
+              inputmode="numeric"
+              placeholder="MM/AA"
+              [ngModel]="expiry"
+              (ngModelChange)="onExpiryInput($event)"
+              [disabled]="processing()"
+              autocomplete="cc-exp"
+              maxlength="5"
+            />
+            @if (errors()['expiry']) {
+              <small class="pm-error">{{ errors()['expiry'] }}</small>
+            }
+          </label>
+
+          <label class="pm-field">
+            <span>CVV</span>
+            <input
+              type="password"
+              name="cvv"
+              inputmode="numeric"
+              placeholder="•••"
+              [ngModel]="cvv"
+              (ngModelChange)="onCvvInput($event)"
+              [disabled]="processing()"
+              autocomplete="cc-csc"
+              maxlength="4"
+            />
+            @if (errors()['cvv']) {
+              <small class="pm-error">{{ errors()['cvv'] }}</small>
+            }
+          </label>
+        </div>
+
+        <button type="submit" class="pm-submit" [disabled]="processing()">
+          @if (processing()) {
+            <span class="pm-spinner"></span> Procesando pago...
+          } @else {
+            Pagar y confirmar reserva
+          }
+        </button>
+
+        <p class="pm-secure">🔒 Pago simulado — no se procesa un cargo real</p>
+      </form>
+    </div>
+  </div>
+}

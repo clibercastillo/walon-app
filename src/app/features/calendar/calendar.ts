@@ -90,9 +90,9 @@ export class CalendarPage {
     this.loading.set(true);
     const [from, to] = this.rangeForLoad();
     this.calendarService
-      .findConfirmed(from, to, this.stadiumFilter() ?? undefined)
+      .findAllForAdmin(from, to, this.stadiumFilter() ?? undefined)
       .subscribe({
-        next: (data) => {
+        next: (data: Booking[]) => {
           this.bookings.set(data);
           this.loading.set(false);
         },

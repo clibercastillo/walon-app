@@ -27,7 +27,7 @@ export class StadiumForm {
     address: ['', Validators.required],
     city: ['', Validators.required],
     capacity: [10, [Validators.required, Validators.min(1)]],
-    fieldType: ['sintetico', Validators.required],
+    fieldType: ['Sintético', Validators.required],
     pricePerHour: [50, [Validators.required, Validators.min(1)]],
   });
 

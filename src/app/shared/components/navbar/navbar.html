@@ -1,12 +1,14 @@
 <header class="topbar">
   <div class="topbar-inner">
-    <a routerLink="/home" class="brand">
+    <a [routerLink]="auth.isAdmin() ? '/calendar' : '/home'" class="brand">
       <span class="brand-dot"></span>
       WALON
     </a>
 
     <nav class="links">
+      @if (!auth.isAdmin()) {
       <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a>
+      }
       @if (auth.isAuthenticated()) {
         @if (auth.isAdmin()) {
         <a routerLink="/stadiums" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Canchas</a>
@@ -30,12 +32,14 @@
 
 @if (auth.isAuthenticated()) {
 <nav class="bottom-nav">
+  @if (!auth.isAdmin()) {
   <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
     <svg viewBox="0 0 24 24" width="22" height="22">
       <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
     </svg>
     <span>Inicio</span>
   </a>
+  }
   <!-- <a routerLink="/bookings" routerLinkActive="active">
     <svg viewBox="0 0 24 24" width="22" height="22">
       <path fill="currentColor"

@@ -33,7 +33,7 @@ export class Login {
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.toast.success('¡Bienvenido de nuevo!');
-        this.router.navigate(['/home']);
+        this.router.navigate([this.auth.isAdmin() ? '/calendar' : '/home']);
       },
       error: () => this.loading.set(false),
       complete: () => this.loading.set(false),

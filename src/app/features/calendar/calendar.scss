@@ -118,6 +118,18 @@
   opacity: 0.85;
 }
 
+// Colores por estado (semana)
+.event-block.status-pending {
+  background: #9a958a; // gris, tono acorde a la paleta cálida
+  color: #fff;
+}
+.event-block.status-confirmed {
+  background: var(--color-primary);
+}
+.event-block.status-completed {
+  background: var(--color-primary-dark);
+}
+
 /* ===== Mes ===== */
 .month-grid {
   padding: 0;
@@ -177,6 +189,14 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.month-chip.status-pending {
+  border-left-color: #9a958a;
+  color: var(--color-text-dim);
+}
+.month-chip.status-completed {
+  border-left-color: var(--color-primary-dark);
 }
 
 .month-more {

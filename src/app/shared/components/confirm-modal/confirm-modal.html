@@ -1,0 +1,14 @@
+@if (open) {
+  <div class="cm-overlay" (click)="closed.emit()">
+    <div class="cm-card" (click)="$event.stopPropagation()">
+      <h3>{{ title }}</h3>
+      <p>{{ message }}</p>
+      <div class="cm-actions">
+        <button type="button" class="cm-cancel" (click)="closed.emit()">{{ cancelLabel }}</button>
+        <button type="button" [class.cm-danger]="danger" [class.cm-confirm]="!danger" (click)="confirmed.emit()">
+          {{ confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -5,3 +5,4 @@ export const environment = {
   bookingsUrl: 'https://api.maderape.online/api/bookings',
   notificationsUrl: 'https://api.maderape.online/api/notifications',
 };
+
