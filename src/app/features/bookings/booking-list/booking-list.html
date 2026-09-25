@@ -66,3 +66,12 @@
   (closed)="closeReviewModal()"
   (submitted)="onReviewSubmitted($event)"
 ></app-review-modal>
+<app-confirm-modal
+  [open]="cancelConfirmOpen()"
+  title="¿Cancelar esta reserva?"
+  [message]="cancelWarningMessage()"
+  confirmLabel="Sí, cancelar de todos modos"
+  cancelLabel="No, mantener mi reserva"
+  (closed)="closeCancelConfirm()"
+  (confirmed)="confirmCancel()"
+></app-confirm-modal>
