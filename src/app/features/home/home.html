@@ -24,7 +24,7 @@
           @for (star of stars(5); track $index; let i = $index) {
           <span class="star" [class.filled]="i < averageRating()">★</span>
           }
-          {{ averageRating() }} ({{ mockReviews.length }})
+          {{ averageRating() }} ({{ reviews().length }})
         </span>
       </p>
       <div class="hero-price">
@@ -131,21 +131,26 @@
       </div>
 
       <div class="card">
-        <h3>Reseñas ({{ mockReviews.length }})</h3>
-        @for (r of mockReviews; track r.name) {
+        <h3>Reseñas ({{ reviews().length }})</h3>
+        @if (!reviews().length) {
+        <p>Aún no hay reseñas. ¡Sé el primero en dejar una!</p>
+        }
+        @for (r of reviews(); track r.id) {
         <div class="review-item">
-          <div class="review-avatar">{{ r.initial }}</div>
+          <div class="review-avatar">{{ initial(r.userName) }}</div>
           <div class="review-body">
             <div class="review-top">
-              <strong>{{ r.name }}</strong>
+              <strong>{{ r.userName }}</strong>
               <span class="review-stars">
-                @for (star of stars(r.stars); track $index) {
+                @for (star of stars(r.rating); track $index) {
                 <span class="star filled">★</span>
                 }
               </span>
             </div>
-            <span class="review-date">{{ r.date }}</span>
+            <span class="review-date">{{ reviewDate(r.createdAt) }}</span>
+            @if (r.comment) {
             <p>{{ r.comment }}</p>
+            }
           </div>
         </div>
         }

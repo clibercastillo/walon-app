@@ -6,6 +6,8 @@ import { ToastService } from '../../../core/services/toast.service';
 import { PaymentModal, PaymentResult } from '../../../shared/components/payment-modal/payment-modal';
 import { ReviewModal, ReviewResult } from '../../../shared/components/review-modal/review-modal';
 import { ConfirmModal } from '../../../shared/components/confirm-modal/confirm-modal';
+import { ReviewService } from '../../../core/services/review.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-booking-list',
@@ -17,6 +19,8 @@ import { ConfirmModal } from '../../../shared/components/confirm-modal/confirm-m
 export class BookingList {
   private bookingService = inject(BookingService);
   private toast = inject(ToastService);
+  private reviewService = inject(ReviewService);
+  private authService = inject(AuthService);
 
   bookings = signal<Booking[]>([]);
   loading = signal(true);
@@ -27,6 +31,7 @@ export class BookingList {
   bookingToPay = signal<Booking | null>(null);
 
   // Estado del modal de reseña
+  reviewSending = signal(false);
   reviewModalOpen = signal(false);
   bookingToReview = signal<Booking | null>(null);
 
@@ -131,9 +136,25 @@ export class BookingList {
   }
 
   onReviewSubmitted(result: ReviewResult): void {
-    this.closeReviewModal();
-    this.toast.success('¡Gracias por tu reseña!');
-    // TODO: cuando exista backend de reviews, enviar `result` aquí
+    const b = this.bookingToReview();
+    if (!b) return;
+
+    this.reviewSending.set(true);
+    this.reviewService
+      .create(b.id, {
+        rating: result.rating,
+        comment: result.comment,
+        userName: this.authService.username() ?? '',
+      })
+      .subscribe({
+        next: () => {
+          this.reviewSending.set(false);
+          this.closeReviewModal();
+          this.toast.success('¡Gracias por tu reseña!');
+        },
+        // el interceptor ya muestra el toast de error; el modal queda abierto para reintentar
+        error: () => this.reviewSending.set(false),
+      });
   }
 
   reviewLabel(): string {

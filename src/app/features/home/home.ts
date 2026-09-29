@@ -8,6 +8,8 @@ import { BookingService } from '../../core/services/booking.service';
 import { Stadium } from '../../core/models/stadium.model';
 import { Booking } from '../../core/models/booking.model';
 import { ToastService } from '../../core/services/toast.service';
+import { ReviewService } from '../../core/services/review.service';
+import { Review } from '../../core/models/review.model';
 
 interface DayOption {
   iso: string;
@@ -41,6 +43,7 @@ export class Home {
   private bookingService = inject(BookingService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private reviewService = inject(ReviewService);
 
   loadingStadium = signal(true);
   loading = signal(false);
@@ -54,15 +57,7 @@ export class Home {
 
   private demoWhatsapp = '51999999999';
 
-  mockReviews = [
-    {
-      name: 'Cliber Castillo',
-      initial: 'A',
-      stars: 5,
-      date: '30 de julio de 2026',
-      comment: 'Cancha en buen estado, fácil de reservar y llegar.',
-    },
-  ];
+  reviews = signal<Review[]>([]);
 
   galleryPlaceholders = [1, 2, 3, 4];
 
@@ -99,21 +94,38 @@ export class Home {
   });
 
   averageRating = computed(() => {
-    if (!this.mockReviews.length) return 0;
-    const sum = this.mockReviews.reduce((acc, r) => acc + r.stars, 0);
-    return Math.round((sum / this.mockReviews.length) * 10) / 10;
+    const list = this.reviews();
+    if (!list.length) return 0;
+    const sum = list.reduce((acc, r) => acc + r.rating, 0);
+    return Math.round((sum / list.length) * 10) / 10;
   });
 
   stars(n: number): number[] {
     return Array(n).fill(0);
   }
 
+  private loadReviews(stadiumId: number): void {
+    this.reviewService
+      .findByStadium(stadiumId)
+      .pipe(catchError(() => of([] as Review[])))
+      .subscribe((list) => this.reviews.set(list));
+  }
+
+  initial(name: string): string {
+    return (name?.trim()[0] ?? '?').toUpperCase();
+  }
+
+  reviewDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  
   ngOnInit(): void {
     this.stadiumService.findById(1).subscribe({
       next: (data) => {
         this.stadium.set(data);
         this.loadingStadium.set(false);
         this.loadSlotsForDay();
+        this.loadReviews(data.id);
       },
       error: () => this.loadingStadium.set(false),
     });

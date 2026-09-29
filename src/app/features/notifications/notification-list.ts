@@ -23,8 +23,7 @@ export class NotificationList {
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         this.notifications.set(sorted);
-        this.notificationService.setNotifications(sorted);
-        this.notificationService.markAllRead(); // ← borra el badge del navbar
+        this.notificationService.markAllAsRead().subscribe();
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

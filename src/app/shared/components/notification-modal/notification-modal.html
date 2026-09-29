@@ -1,0 +1,62 @@
+@if (open) {
+  <div class="nm-overlay" (click)="close()">
+    <div class="nm-card" (click)="$event.stopPropagation()" role="dialog" aria-label="Notificaciones">
+      <div class="nm-header">
+        <h3>Notificaciones</h3>
+        <button type="button" class="nm-close" (click)="close()" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="nm-toolbar">
+        <span class="nm-unread-label">
+          @if (unreadCount() > 0) {
+            {{ unreadCount() }} sin leer
+          } @else {
+            Todo al día
+          }
+        </span>
+        <button
+          type="button"
+          class="nm-link"
+          (click)="markAll()"
+          [disabled]="unreadCount() === 0 || markingAll()"
+        >
+          Marcar todas como leídas
+        </button>
+      </div>
+
+      <div class="nm-body">
+        @if (loading()) {
+          <p class="nm-empty">Cargando...</p>
+        } @else if (items().length === 0) {
+          <p class="nm-empty">No tienes notificaciones todavía.</p>
+        } @else {
+          <ul class="nm-list">
+            @for (n of items(); track n.id) {
+              <li>
+                <button type="button" class="nm-item" [class.unread]="!n.read" (click)="markOne(n)">
+                  <span class="nm-dot" [class.on]="!n.read"></span>
+                  <span class="nm-text">
+                    <span class="nm-msg">{{ n.message }}</span>
+                    <small class="nm-date">{{ n.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="nm-pager">
+          <button type="button" class="nm-page-btn" (click)="prev()" [disabled]="!hasPrev() || loading()">
+            ‹ Anterior
+          </button>
+          <span class="nm-page-info">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+          <button type="button" class="nm-page-btn" (click)="next()" [disabled]="!hasNext() || loading()">
+            Siguiente ›
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

@@ -14,8 +14,20 @@ export interface ReviewResult {
   styleUrl: './review-modal.scss',
 })
 export class ReviewModal {
-  @Input() open = false;
+  private _open = false;
+
+  // Al abrirse limpia el formulario (antes lo hacía el setTimeout falso)
+  @Input() set open(value: boolean) {
+    if (value && !this._open) this.reset();
+    this._open = value;
+  }
+  get open(): boolean {
+    return this._open;
+  }
+
   @Input() bookingLabel = '';
+  // Ahora lo controla el padre mientras dura la llamada real al backend
+  @Input() sending = false;
 
   @Output() closed = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<ReviewResult>();
@@ -26,7 +38,6 @@ export class ReviewModal {
   comment = '';
 
   error = signal<string | null>(null);
-  sending = signal(false);
 
   setRating(value: number): void {
     this.rating.set(value);
@@ -34,8 +45,7 @@ export class ReviewModal {
   }
 
   close(): void {
-    if (this.sending()) return;
-    this.reset();
+    if (this.sending) return;
     this.closed.emit();
   }
 
@@ -44,19 +54,11 @@ export class ReviewModal {
       this.error.set('Selecciona al menos una estrella');
       return;
     }
-
-    // Reseña ficticia: aún no hay backend de reviews
-    this.sending.set(true);
-    setTimeout(() => {
-      this.sending.set(false);
-      const result: ReviewResult = { rating: this.rating(), comment: this.comment.trim() };
-      this.reset();
-      this.submitted.emit(result);
-    }, 600);
+    this.submitted.emit({ rating: this.rating(), comment: this.comment.trim() });
   }
 
   skip(): void {
-    this.reset();
+    if (this.sending) return;
     this.closed.emit();
   }
 

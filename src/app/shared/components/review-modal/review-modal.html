@@ -1,7 +1,7 @@
 @if (open) {
   <div class="rm-overlay" (click)="close()">
     <div class="rm-card" (click)="$event.stopPropagation()">
-      <button class="rm-close" (click)="close()" [disabled]="sending()" aria-label="Cerrar">✕</button>
+      <button class="rm-close" (click)="close()" [disabled]="sending" aria-label="Cerrar">✕</button>
 
       <div class="rm-header">
         <div class="rm-icon">⚽</div>
@@ -34,16 +34,16 @@
           rows="3"
           placeholder="¿Cómo estuvo la cancha, la iluminación, el servicio?"
           [(ngModel)]="comment"
-          [disabled]="sending()"
+          [disabled]="sending"
         ></textarea>
       </label>
 
       <div class="rm-actions">
-        <button type="button" class="rm-skip" (click)="skip()" [disabled]="sending()">
+        <button type="button" class="rm-skip" (click)="skip()" [disabled]="sending">
           Omitir
         </button>
-        <button type="button" class="rm-submit" (click)="submit()" [disabled]="sending()">
-          @if (sending()) {
+        <button type="button" class="rm-submit" (click)="submit()" [disabled]="sending">
+          @if (sending) {
             <span class="rm-spinner"></span> Enviando...
           } @else {
             Enviar reseña

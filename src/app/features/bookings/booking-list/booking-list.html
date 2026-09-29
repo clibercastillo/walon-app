@@ -63,6 +63,7 @@
 <app-review-modal
   [open]="reviewModalOpen()"
   [bookingLabel]="reviewLabel()"
+  [sending]="reviewSending()"
   (closed)="closeReviewModal()"
   (submitted)="onReviewSubmitted($event)"
 ></app-review-modal>
