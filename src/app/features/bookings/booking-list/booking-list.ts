@@ -8,6 +8,9 @@ import { ReviewModal, ReviewResult } from '../../../shared/components/review-mod
 import { ConfirmModal } from '../../../shared/components/confirm-modal/confirm-modal';
 import { ReviewService } from '../../../core/services/review.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AssistantService } from '../../../core/services/assistant.service';
 
 @Component({
   selector: 'app-booking-list',
@@ -21,6 +24,8 @@ export class BookingList {
   private toast = inject(ToastService);
   private reviewService = inject(ReviewService);
   private authService = inject(AuthService);
+  private assistant = inject(AssistantService);
+  private destroyRef = inject(DestroyRef);
 
   bookings = signal<Booking[]>([]);
   loading = signal(true);
@@ -41,6 +46,9 @@ export class BookingList {
 
   ngOnInit(): void {
     this.load();
+    this.assistant.bookingCreated$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.load());
   }
 
   load(): void {
