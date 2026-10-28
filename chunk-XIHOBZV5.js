@@ -1,1 +1,0 @@
-import{J as r,O as a,Sb as i,Vb as n,f as o}from"./chunk-P2MMTILG.js";var p=class t{http=a(i);bookingCreated$=new o;chat(s,e){let c={message:s,conversationId:e};return this.http.post(`${n.bookingsUrl}/assistant/chat`,c)}static \u0275fac=function(e){return new(e||t)};static \u0275prov=r({token:t,factory:t.\u0275fac,providedIn:"root"})};export{p as a};
