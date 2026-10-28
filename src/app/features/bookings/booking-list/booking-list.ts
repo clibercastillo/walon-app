@@ -54,7 +54,7 @@ export class BookingList {
   });
 
   counts = computed(() => {
-    const c: Record<string, number> = { ALL: this.bookings().length };
+    const c: Partial<Record<string, number>> = { ALL: this.bookings().length };
     for (const b of this.bookings()) c[b.status] = (c[b.status] ?? 0) + 1;
     return c;
   });

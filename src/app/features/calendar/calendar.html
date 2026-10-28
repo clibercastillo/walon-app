@@ -1,13 +1,14 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <h2>Calendario de reservas</h2>
+      <h2>Calendario de <em>reservas</em></h2>
       <p>Reservas pendientes, confirmadas y completadas en todas las canchas</p>
     </div>
 
     <div class="cal-controls">
       <select
         class="cal-select"
+        aria-label="Filtrar por cancha"
         [ngModel]="stadiumFilter()"
         (ngModelChange)="stadiumFilter.set($event); onStadiumFilterChange()"
       >
@@ -17,99 +18,134 @@
         }
       </select>
 
-      <div class="cal-toggle">
-        <button
-          class="btn btn-sm"
-          [class.btn-primary]="viewMode() === 'week'"
-          [class.btn-outline]="viewMode() !== 'week'"
-          (click)="setView('week')"
-        >
-          Semana
-        </button>
-        <button
-          class="btn btn-sm"
-          [class.btn-primary]="viewMode() === 'month'"
-          [class.btn-outline]="viewMode() !== 'month'"
-          (click)="setView('month')"
-        >
-          Mes
-        </button>
+      <div class="seg" role="tablist" aria-label="Vista">
+        <button type="button" role="tab" [class.active]="viewMode() === 'week'" [attr.aria-selected]="viewMode() === 'week'" (click)="setView('week')">Semana</button>
+        <button type="button" role="tab" [class.active]="viewMode() === 'month'" [attr.aria-selected]="viewMode() === 'month'" (click)="setView('month')">Mes</button>
       </div>
     </div>
   </div>
 
-  <div class="cal-nav card">
-    <button class="btn btn-outline btn-sm" (click)="prev()">‹</button>
-    <span class="cal-range">
-      {{ viewMode() === 'week' ? weekRangeLabel() : monthLabel() }}
-    </span>
-    <button class="btn btn-outline btn-sm" (click)="next()">›</button>
-    <button class="btn btn-outline btn-sm" (click)="today()">Hoy</button>
+  <!-- Barra: navegación + leyenda/filtro + ingresos -->
+  <div class="cal-bar card">
+    <div class="cal-nav">
+      <button type="button" class="icon-btn" aria-label="Anterior" (click)="prev()">‹</button>
+      <button type="button" class="icon-btn" aria-label="Siguiente" (click)="next()">›</button>
+      <button type="button" class="btn btn-outline btn-sm" (click)="today()">Hoy</button>
+    </div>
+
+    <h3 class="cal-range">{{ viewMode() === 'week' ? weekRangeLabel() : monthLabel() }}</h3>
+
+    <div class="cal-legend">
+      @for (l of legend; track l.key) {
+        <button
+          type="button"
+          class="lg"
+          [attr.data-status]="l.key"
+          [class.off]="isHidden(l.key)"
+          [attr.aria-pressed]="!isHidden(l.key)"
+          [title]="isHidden(l.key) ? 'Mostrar ' + l.label.toLowerCase() : 'Ocultar ' + l.label.toLowerCase()"
+          (click)="toggleStatus(l.key)"
+        >
+          <i class="dot"></i>{{ l.label }}<b>{{ stats().counts[l.key] }}</b>
+        </button>
+      }
+      <span class="rev" title="Suma de reservas confirmadas y completadas">
+        <small>Ingresos</small>S/ {{ stats().revenue.toFixed(2) }}
+      </span>
+    </div>
   </div>
 
-  @if (loading()) {
-    <div class="empty-state">Cargando reservas...</div>
-  } @else if (viewMode() === 'week') {
-    <!-- ===== VISTA SEMANA ===== -->
-    <div class="week-grid card">
-      <div class="week-header">
-        <div class="time-col"></div>
-        @for (d of weekDays(); track d) {
-          <div class="day-col-header">
-            <span class="day-name">{{ d.toLocaleDateString('es-PE', { weekday: 'short' }) }}</span>
-            <span class="day-num">{{ d.getDate() }}</span>
-          </div>
-        }
-      </div>
+  @if (!loading() && stats().total === 0) {
+    <p class="cal-hint">No hay reservas en este periodo.</p>
+  }
 
-      <div class="week-body">
-        <div class="time-col">
-          @for (h of hours; track h) {
-            <div class="hour-slot">{{ h }}:00</div>
+  @if (viewMode() === 'week') {
+    <!-- ===== VISTA SEMANA ===== -->
+    <div class="cal card" [class.busy]="loading()">
+      <div class="cal-progress" [class.on]="loading()"></div>
+
+      <div class="week-scroll" #weekScroll>
+        <div class="week-header">
+          <div class="time-col"></div>
+          @for (d of weekDays(); track d.getTime()) {
+            <div class="day-head" [class.today]="isToday(d)">
+              <span class="day-name">{{ d.toLocaleDateString('es-PE', { weekday: 'short' }) }}</span>
+              <span class="day-num">{{ d.getDate() }}</span>
+            </div>
           }
         </div>
 
-        @for (events of weekEventsByDay(); track $index) {
-          <div class="day-col" [style.height.px]="hours.length * 56">
+        <div class="week-body" [style.--hh]="hourHeight + 'px'">
+          <div class="time-col">
             @for (h of hours; track h) {
-              <div class="hour-line"></div>
-            }
-            @for (ev of events; track ev.booking.id) {
-              <div
-                class="event-block"
-                [class]="'status-' + ev.booking.status.toLowerCase()"
-                [style.top.px]="ev.top"
-                [style.height.px]="ev.height"
-                [title]="ev.stadiumName + ' · ' + ev.booking.userEmail + ' · ' + ev.booking.status"
-              >
-                <strong>{{ ev.stadiumName }}</strong>
-                <span>{{ ev.booking.startTime.slice(0, 5) }}–{{ ev.booking.endTime.slice(0, 5) }}</span>
-                <small>{{ ev.booking.userEmail }}</small>
-              </div>
+              <div class="hour-slot">{{ hourLabel(h) }}</div>
             }
           </div>
-        }
+
+          @for (events of weekEventsByDay(); track $index) {
+            <div class="day-col" [class.today]="isToday(weekDays()[$index])" [style.height.px]="hours.length * hourHeight">
+              @for (h of hours; track h) {
+                <div class="hour-line"></div>
+              }
+
+              @if (isToday(weekDays()[$index]) && nowTop() !== null) {
+                <div class="now-line" [style.top.px]="nowTop()"></div>
+              }
+
+              @for (ev of events; track ev.booking.id) {
+                <button
+                  type="button"
+                  class="event"
+                  [attr.data-status]="ev.booking.status"
+                  [class.compact]="ev.height < 46"
+                  [style.top.px]="ev.top"
+                  [style.height.px]="ev.height"
+                  [style.left]="'calc(' + ev.left + '% + 2px)'"
+                  [style.width]="'calc(' + ev.width + '% - 4px)'"
+                  [attr.aria-label]="ev.stadiumName + ', ' + ev.booking.startTime.slice(0, 5) + ' a ' + ev.booking.endTime.slice(0, 5)"
+                  (click)="open(ev)"
+                >
+                  <strong>{{ ev.stadiumName }}</strong>
+                  <span>{{ ev.booking.startTime.slice(0, 5) }}–{{ ev.booking.endTime.slice(0, 5) }}</span>
+                  <small>{{ ev.booking.userEmail }}</small>
+                </button>
+              }
+            </div>
+          }
+        </div>
       </div>
     </div>
   } @else {
     <!-- ===== VISTA MES ===== -->
-    <div class="month-grid card">
+    <div class="cal card" [class.busy]="loading()">
+      <div class="cal-progress" [class.on]="loading()"></div>
+
       <div class="month-header">
-        @for (name of ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']; track name) {
-          <div class="month-header-cell">{{ name }}</div>
+        @for (name of dayNames; track name) {
+          <div class="month-head-cell">{{ name }}</div>
         }
       </div>
+
       <div class="month-body">
-        @for (cell of monthCells(); track cell.date) {
-          <div class="month-cell" [class.out-month]="!cell.inMonth" [class.today]="cell.isToday">
-            <span class="month-day-num">{{ cell.date.getDate() }}</span>
+        @for (cell of monthCells(); track cell.date.getTime()) {
+          <div class="month-cell" [class.out]="!cell.inMonth" [class.today]="cell.isToday">
+            <button type="button" class="month-day-num" title="Ver esta semana" (click)="goToDay(cell.date)">
+              {{ cell.date.getDate() }}
+            </button>
+
             @for (ev of cell.events.slice(0, 3); track ev.booking.id) {
-              <div class="month-chip" [class]="'status-' + ev.booking.status.toLowerCase()" [title]="ev.stadiumName + ' · ' + ev.booking.userEmail + ' · ' + ev.booking.status">
+              <button
+                type="button"
+                class="chip"
+                [attr.data-status]="ev.booking.status"
+                [title]="ev.stadiumName + ' · ' + ev.booking.userEmail"
+                (click)="open(ev)"
+              >
                 {{ ev.booking.startTime.slice(0, 5) }} {{ ev.stadiumName }}
-              </div>
+              </button>
             }
             @if (cell.events.length > 3) {
-              <span class="month-more">+{{ cell.events.length - 3 }} más</span>
+              <button type="button" class="more" (click)="goToDay(cell.date)">+{{ cell.events.length - 3 }} más</button>
             }
           </div>
         }
@@ -117,3 +153,42 @@
     </div>
   }
 </div>
+
+<!-- ===== DETALLE DE RESERVA ===== -->
+@if (selected(); as ev) {
+  <div class="ev-overlay" (click)="close()">
+    <div
+      class="ev-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ev-title"
+      [attr.data-status]="ev.booking.status"
+      (click)="$event.stopPropagation()"
+    >
+      <button type="button" class="ev-close" (click)="close()" aria-label="Cerrar">✕</button>
+
+      <span class="badge" [class]="'badge-' + ev.booking.status.toLowerCase()">{{ statusLabel(ev.booking.status) }}</span>
+      <h3 id="ev-title">{{ ev.stadiumName }}</h3>
+      <p class="ev-sub">Reserva #{{ ev.booking.id }}</p>
+
+      <dl class="ev-list">
+        <div>
+          <dt>🗓 Fecha</dt>
+          <dd>{{ longDate(ev.booking) }}</dd>
+        </div>
+        <div>
+          <dt>🕒 Horario</dt>
+          <dd>{{ ev.booking.startTime.slice(0, 5) }} – {{ ev.booking.endTime.slice(0, 5) }} · {{ duration(ev.booking) }}</dd>
+        </div>
+        <div>
+          <dt>👤 Cliente</dt>
+          <dd><a [href]="'mailto:' + ev.booking.userEmail">{{ ev.booking.userEmail }}</a></dd>
+        </div>
+        <div>
+          <dt>💰 Total</dt>
+          <dd>S/ {{ ev.booking.totalPrice.toFixed(2) }}</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+}
