@@ -16,7 +16,7 @@ export interface ReviewResult {
 export class ReviewModal {
   private _open = false;
 
-  // Al abrirse limpia el formulario (antes lo hacía el setTimeout falso)
+  // Al abrirse limpia el formulario
   @Input() set open(value: boolean) {
     if (value && !this._open) this.reset();
     this._open = value;
@@ -26,18 +26,24 @@ export class ReviewModal {
   }
 
   @Input() bookingLabel = '';
-  // Ahora lo controla el padre mientras dura la llamada real al backend
   @Input() sending = false;
 
   @Output() closed = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<ReviewResult>();
 
   stars = [1, 2, 3, 4, 5];
+  readonly maxComment = 300;
+  private readonly labels = ['Toca una estrella', 'Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente'];
+
   rating = signal(0);
   hoverRating = signal(0);
   comment = '';
 
   error = signal<string | null>(null);
+
+  get ratingLabel(): string {
+    return this.labels[this.hoverRating() || this.rating()];
+  }
 
   setRating(value: number): void {
     this.rating.set(value);

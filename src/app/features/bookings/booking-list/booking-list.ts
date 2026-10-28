@@ -1,16 +1,18 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BookingService } from '../../../core/services/booking.service';
-import { Booking } from '../../../core/models/booking.model';
+import { Booking, BookingStatus } from '../../../core/models/booking.model';
 import { ToastService } from '../../../core/services/toast.service';
 import { PaymentModal, PaymentResult } from '../../../shared/components/payment-modal/payment-modal';
 import { ReviewModal, ReviewResult } from '../../../shared/components/review-modal/review-modal';
 import { ConfirmModal } from '../../../shared/components/confirm-modal/confirm-modal';
 import { ReviewService } from '../../../core/services/review.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AssistantService } from '../../../core/services/assistant.service';
+import { StadiumService } from '../../../core/services/stadium.service';
+
+type StatusFilter = 'ALL' | BookingStatus;
 
 @Component({
   selector: 'app-booking-list',
@@ -21,6 +23,7 @@ import { AssistantService } from '../../../core/services/assistant.service';
 })
 export class BookingList {
   private bookingService = inject(BookingService);
+  private stadiumService = inject(StadiumService);
   private toast = inject(ToastService);
   private reviewService = inject(ReviewService);
   private authService = inject(AuthService);
@@ -30,6 +33,31 @@ export class BookingList {
   bookings = signal<Booking[]>([]);
   loading = signal(true);
   actionLoadingId = signal<number | null>(null);
+
+  // Nombres de canchas (id -> nombre) para no mostrar "Cancha #3"
+  stadiumNames = signal<Record<number, string>>({});
+
+  // Filtros por estado
+  readonly filters: { key: StatusFilter; label: string }[] = [
+    { key: 'ALL', label: 'Todas' },
+    { key: 'PENDING', label: 'Pendientes' },
+    { key: 'CONFIRMED', label: 'Confirmadas' },
+    { key: 'COMPLETED', label: 'Completadas' },
+    { key: 'CANCELLED', label: 'Canceladas' },
+  ];
+  activeFilter = signal<StatusFilter>('ALL');
+
+  filtered = computed(() => {
+    const f = this.activeFilter();
+    const all = this.bookings();
+    return f === 'ALL' ? all : all.filter((b) => b.status === f);
+  });
+
+  counts = computed(() => {
+    const c: Record<string, number> = { ALL: this.bookings().length };
+    for (const b of this.bookings()) c[b.status] = (c[b.status] ?? 0) + 1;
+    return c;
+  });
 
   // Estado del modal de pago
   paymentModalOpen = signal(false);
@@ -46,6 +74,7 @@ export class BookingList {
 
   ngOnInit(): void {
     this.load();
+    this.loadStadiumNames();
     this.assistant.bookingCreated$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.load());
@@ -62,6 +91,21 @@ export class BookingList {
     });
   }
 
+  private loadStadiumNames(): void {
+    this.stadiumService.findAll().subscribe({
+      next: (list) => {
+        const map: Record<number, string> = {};
+        for (const s of list) map[s.id] = s.name;
+        this.stadiumNames.set(map);
+      },
+      error: () => {}, // si falla, se muestra "Cancha #id"
+    });
+  }
+
+  setFilter(f: StatusFilter): void {
+    this.activeFilter.set(f);
+  }
+
   // Al hacer clic en "Confirmar" primero se pide el pago (modal), no se confirma directo
   confirm(b: Booking): void {
     this.bookingToPay.set(b);
@@ -73,7 +117,6 @@ export class BookingList {
     this.bookingToPay.set(null);
   }
 
-  // Se ejecuta cuando el pago (ficticio) fue "aprobado" en el modal
   onPaid(_result: PaymentResult): void {
     const b = this.bookingToPay();
     this.paymentModalOpen.set(false);
@@ -160,30 +203,75 @@ export class BookingList {
           this.closeReviewModal();
           this.toast.success('¡Gracias por tu reseña!');
         },
-        // el interceptor ya muestra el toast de error; el modal queda abierto para reintentar
         error: () => this.reviewSending.set(false),
       });
+  }
+
+  // ===== Helpers de presentación =====
+  stadiumName(b: Booking): string {
+    return this.stadiumNames()[b.stadiumId] ?? `Cancha #${b.stadiumId}`;
+  }
+
+  private dateOf(b: Booking): Date {
+    const [y, m, d] = b.bookingDate.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  day(b: Booking): string {
+    return String(this.dateOf(b).getDate()).padStart(2, '0');
+  }
+
+  month(b: Booking): string {
+    return this.dateOf(b).toLocaleDateString('es-PE', { month: 'short' }).replace('.', '').toUpperCase();
+  }
+
+  weekday(b: Booking): string {
+    const w = this.dateOf(b).toLocaleDateString('es-PE', { weekday: 'long' });
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }
+
+  duration(b: Booking): string {
+    const toMin = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const hours = (toMin(b.endTime) - toMin(b.startTime)) / 60;
+    if (hours <= 0) return '';
+    return Number.isInteger(hours) ? `${hours} h` : `${hours.toFixed(1)} h`;
+  }
+
+  statusLabel(s: BookingStatus): string {
+    return { PENDING: 'Pendiente', CONFIRMED: 'Confirmada', COMPLETED: 'Completada', CANCELLED: 'Cancelada' }[s];
+  }
+
+  statusHint(s: BookingStatus): string {
+    return {
+      PENDING: 'Paga para asegurar tu cancha',
+      CONFIRMED: 'Pago recibido · te esperamos',
+      COMPLETED: 'Partido jugado',
+      CANCELLED: 'Esta reserva fue cancelada',
+    }[s];
+  }
+
+  statusClass(status: string): string {
+    return 'badge-' + status.toLowerCase();
   }
 
   reviewLabel(): string {
     const b = this.bookingToReview();
     if (!b) return '';
-    return `Cancha #${b.stadiumId} · ${b.bookingDate}`;
+    return `${this.stadiumName(b)} · ${b.bookingDate}`;
   }
 
   paymentLabel(): string {
     const b = this.bookingToPay();
     if (!b) return '';
-    return `Cancha #${b.stadiumId} · ${b.bookingDate} · ${b.startTime.slice(0, 5)} - ${b.endTime.slice(0, 5)}`;
+    return `${this.stadiumName(b)} · ${b.bookingDate} · ${b.startTime.slice(0, 5)} - ${b.endTime.slice(0, 5)}`;
   }
 
   cancelWarningMessage(): string {
     const b = this.bookingToCancel();
     if (!b) return '';
-    return `Perderás los S/ ${b.totalPrice.toFixed(2)} que ya pagaste por la cancha #${b.stadiumId} del ${b.bookingDate}. Esta acción no se puede deshacer.`;
-  }
-
-  statusClass(status: string): string {
-    return 'badge-' + status.toLowerCase();
+    return `Perderás los S/ ${b.totalPrice.toFixed(2)} que ya pagaste por ${this.stadiumName(b)} del ${b.bookingDate}. Esta acción no se puede deshacer.`;
   }
 }

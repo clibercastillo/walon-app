@@ -1,55 +1,96 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <h2>Mis reservas</h2>
+      <h2>Mis <em>reservas</em></h2>
       <p>Gestiona el estado de tus reservas</p>
     </div>
-    <a routerLink="/home" class="btn btn-primary" style="text-decoration:none">
-      + Nueva reserva
-    </a>
+    <a routerLink="/home" class="btn btn-primary btn-new">+ Nueva reserva</a>
   </div>
 
   @if (loading()) {
-    <div class="empty-state">Cargando reservas...</div>
+    <div class="booking-list">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
   } @else if (bookings().length === 0) {
-    <div class="empty-state">
-      <p>Aún no tienes reservas.</p>
-      <a routerLink="/home" class="btn btn-outline" style="text-decoration:none">Ver canchas</a>
+    <div class="empty">
+      <div class="empty-icon">⚽</div>
+      <h3>Aún no tienes reservas</h3>
+      <p>Encuentra una cancha y reserva tu próximo partido.</p>
+      <a routerLink="/home" class="btn btn-primary btn-new">Ver canchas</a>
     </div>
   } @else {
-    <div class="booking-list">
-      @for (b of bookings(); track b.id) {
-        <div class="card booking-item">
-          <div class="booking-info">
-            <div class="booking-top">
-              <strong>Reserva #{{ b.id }}</strong>
-              <span class="badge" [class]="statusClass(b.status)">{{ b.status }}</span>
-            </div>
-            <p>Cancha #{{ b.stadiumId }} · {{ b.bookingDate }} · {{ b.startTime.slice(0,5) }} - {{ b.endTime.slice(0,5) }}</p>
-            <span class="price">S/ {{ b.totalPrice }}</span>
-          </div>
-
-          <div class="booking-actions">
-            @if (b.status === 'PENDING') {
-              <button class="btn btn-primary btn-sm" [disabled]="actionLoadingId() === b.id" (click)="confirm(b)">
-                Confirmar
-              </button>
-              <button class="btn btn-danger btn-sm" [disabled]="actionLoadingId() === b.id" (click)="cancel(b)">
-                Cancelar
-              </button>
-            }
-            @if (b.status === 'CONFIRMED') {
-              <button class="btn btn-primary btn-sm" [disabled]="actionLoadingId() === b.id" (click)="complete(b)">
-                Completar
-              </button>
-              <button class="btn btn-danger btn-sm" [disabled]="actionLoadingId() === b.id" (click)="cancel(b)">
-                Cancelar
-              </button>
-            }
-          </div>
-        </div>
+    <div class="filters" role="tablist" aria-label="Filtrar por estado">
+      @for (f of filters; track f.key) {
+        <button
+          type="button"
+          class="chip"
+          role="tab"
+          [class.active]="activeFilter() === f.key"
+          [attr.aria-selected]="activeFilter() === f.key"
+          (click)="setFilter(f.key)"
+        >
+          {{ f.label }}
+          <span class="count">{{ counts()[f.key] ?? 0 }}</span>
+        </button>
       }
     </div>
+
+    @if (filtered().length === 0) {
+      <div class="empty empty-sm">
+        <p>No tienes reservas en este estado.</p>
+        <button type="button" class="btn btn-outline btn-sm" (click)="setFilter('ALL')">Ver todas</button>
+      </div>
+    } @else {
+      <div class="booking-list">
+        @for (b of filtered(); track b.id) {
+          <article class="bk" [attr.data-status]="b.status">
+            <div class="bk-date" aria-hidden="true">
+              <span class="day">{{ day(b) }}</span>
+              <span class="month">{{ month(b) }}</span>
+            </div>
+
+            <div class="bk-info">
+              <div class="bk-head">
+                <h3>{{ stadiumName(b) }}</h3>
+                <span class="badge" [class]="statusClass(b.status)">{{ statusLabel(b.status) }}</span>
+              </div>
+              <p class="meta">
+                <span>🗓 {{ weekday(b) }}</span>
+                <span>🕒 {{ b.startTime.slice(0, 5) }} - {{ b.endTime.slice(0, 5) }}
+                  @if (duration(b)) { · {{ duration(b) }} }
+                </span>
+                <span class="muted">#{{ b.id }}</span>
+              </p>
+              <p class="hint">{{ statusHint(b.status) }}</p>
+            </div>
+
+            <div class="bk-side">
+              <div class="bk-price">S/ {{ b.totalPrice.toFixed(2) }}</div>
+              <div class="bk-actions">
+                @if (b.status === 'PENDING') {
+                  <button class="btn btn-primary btn-sm" [disabled]="actionLoadingId() === b.id" (click)="confirm(b)">
+                    Pagar y confirmar
+                  </button>
+                  <button class="btn btn-danger btn-sm" [disabled]="actionLoadingId() === b.id" (click)="cancel(b)">
+                    Cancelar
+                  </button>
+                }
+                @if (b.status === 'CONFIRMED') {
+                  <button class="btn btn-primary btn-sm" [disabled]="actionLoadingId() === b.id" (click)="complete(b)">
+                    Marcar completada
+                  </button>
+                  <button class="btn btn-danger btn-sm" [disabled]="actionLoadingId() === b.id" (click)="cancel(b)">
+                    Cancelar
+                  </button>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
   }
 </div>
 

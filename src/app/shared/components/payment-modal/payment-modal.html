@@ -1,14 +1,20 @@
 @if (open) {
   <div class="pm-overlay" (click)="close()">
-    <div class="pm-card" (click)="$event.stopPropagation()">
-      <button class="pm-close" (click)="close()" [disabled]="processing()" aria-label="Cerrar">✕</button>
+    <div class="pm-card" role="dialog" aria-modal="true" aria-labelledby="pm-title" (click)="$event.stopPropagation()">
+      <div class="pm-top">
+        <div>
+          <span class="pm-eyebrow">Paso final</span>
+          <h3 id="pm-title">Pagar y confirmar</h3>
+        </div>
+        <button class="pm-close" (click)="close()" [disabled]="processing()" aria-label="Cerrar">✕</button>
+      </div>
 
-      <div class="pm-header">
-        <div class="pm-icon">💳</div>
-        <h3>Pago con tarjeta</h3>
-        @if (bookingLabel) {
-          <p class="pm-subtitle">{{ bookingLabel }}</p>
-        }
+      <!-- Resumen de la reserva -->
+      <div class="pm-summary">
+        <div class="pm-summary-info">
+          <span class="pm-summary-label">Tu reserva</span>
+          <strong>{{ bookingLabel }}</strong>
+        </div>
         @if (amount !== null) {
           <div class="pm-amount">S/ {{ amount.toFixed(2) }}</div>
         }
@@ -41,6 +47,7 @@
             name="cardHolder"
             placeholder="Como aparece en la tarjeta"
             [(ngModel)]="cardHolder"
+            [class.invalid]="errors()['cardHolder']"
             [disabled]="processing()"
             autocomplete="cc-name"
           />
@@ -58,6 +65,7 @@
             placeholder="0000 0000 0000 0000"
             [ngModel]="cardNumber"
             (ngModelChange)="onCardNumberInput($event)"
+            [class.invalid]="errors()['cardNumber']"
             [disabled]="processing()"
             autocomplete="cc-number"
             maxlength="19"
@@ -77,6 +85,7 @@
               placeholder="MM/AA"
               [ngModel]="expiry"
               (ngModelChange)="onExpiryInput($event)"
+              [class.invalid]="errors()['expiry']"
               [disabled]="processing()"
               autocomplete="cc-exp"
               maxlength="5"
@@ -95,6 +104,7 @@
               placeholder="•••"
               [ngModel]="cvv"
               (ngModelChange)="onCvvInput($event)"
+              [class.invalid]="errors()['cvv']"
               [disabled]="processing()"
               autocomplete="cc-csc"
               maxlength="4"
@@ -108,6 +118,8 @@
         <button type="submit" class="pm-submit" [disabled]="processing()">
           @if (processing()) {
             <span class="pm-spinner"></span> Procesando pago...
+          } @else if (amount !== null) {
+            Pagar S/ {{ amount.toFixed(2) }}
           } @else {
             Pagar y confirmar reserva
           }

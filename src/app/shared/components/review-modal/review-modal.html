@@ -1,47 +1,51 @@
 @if (open) {
   <div class="rm-overlay" (click)="close()">
-    <div class="rm-card" (click)="$event.stopPropagation()">
+    <div class="rm-card" role="dialog" aria-modal="true" aria-labelledby="rm-title" (click)="$event.stopPropagation()">
       <button class="rm-close" (click)="close()" [disabled]="sending" aria-label="Cerrar">✕</button>
 
       <div class="rm-header">
         <div class="rm-icon">⚽</div>
-        <h3>¿Cómo estuvo tu partido?</h3>
+        <h3 id="rm-title">¿Cómo estuvo tu partido?</h3>
         @if (bookingLabel) {
           <p class="rm-subtitle">{{ bookingLabel }}</p>
         }
       </div>
 
-      <div class="rm-stars">
-        @for (s of stars; track s) {
-          <button
-            type="button"
-            class="rm-star"
-            [class.filled]="s <= (hoverRating() || rating())"
-            (click)="setRating(s)"
-            (mouseenter)="hoverRating.set(s)"
-            (mouseleave)="hoverRating.set(0)"
-            [attr.aria-label]="s + ' estrellas'"
-          >★</button>
-        }
+      <div class="rm-rating">
+        <div class="rm-stars" (mouseleave)="hoverRating.set(0)">
+          @for (s of stars; track s) {
+            <button
+              type="button"
+              class="rm-star"
+              [class.filled]="s <= (hoverRating() || rating())"
+              (click)="setRating(s)"
+              (mouseenter)="hoverRating.set(s)"
+              [attr.aria-label]="s + ' estrellas'"
+            >★</button>
+          }
+        </div>
+        <div class="rm-rating-label" [class.active]="(hoverRating() || rating()) > 0">{{ ratingLabel }}</div>
       </div>
+
       @if (error()) {
         <small class="rm-error">{{ error() }}</small>
       }
 
       <label class="rm-field">
-        <span>Cuéntanos más (opcional)</span>
+        <span>Cuéntanos más <em class="rm-optional">(opcional)</em></span>
         <textarea
           rows="3"
+          [attr.maxlength]="maxComment"
           placeholder="¿Cómo estuvo la cancha, la iluminación, el servicio?"
           [(ngModel)]="comment"
+          name="comment"
           [disabled]="sending"
         ></textarea>
+        <small class="rm-counter">{{ comment.length }}/{{ maxComment }}</small>
       </label>
 
       <div class="rm-actions">
-        <button type="button" class="rm-skip" (click)="skip()" [disabled]="sending">
-          Omitir
-        </button>
+        <button type="button" class="rm-skip" (click)="skip()" [disabled]="sending">Ahora no</button>
         <button type="button" class="rm-submit" (click)="submit()" [disabled]="sending">
           @if (sending) {
             <span class="rm-spinner"></span> Enviando...
